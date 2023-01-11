@@ -1,4 +1,4 @@
-userID	contactID	date_day	date_month	date_year	date_hour	date_minute	date_second
+#userID	contactID	date_day	date_month	date_year	date_hour	date_minute	date_second
 8	28371	4	10	2010	2	14	19
 8	40306	3	10	2010	12	33	9
 8	85279	2	10	2010	3	10	48
