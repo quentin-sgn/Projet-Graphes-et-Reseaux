@@ -72,9 +72,10 @@ class SocialReg(MF):
         # util.save_data(self.user_sim,'../data/sim/ft_cf_soreg08.pkl')
 
     def get_sim(self, u, k):
-        #sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
-        sim = adam_adar(u, k, self.g_epinions)
+        # sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
+        # sim = adam_adar(u, k, self.g_epinions)
         # sim = cos(u, k, self.df_epinions)
+        sim = cos(u, k, self.df_delicious)
         return sim
 
     def train_model(self, k):
