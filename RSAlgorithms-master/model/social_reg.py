@@ -6,8 +6,11 @@ import numpy as np
 from mf import MF
 from reader.trust import TrustGetter
 from utility.matrix import SimMatrix
-from utility.similarity import pearson_sp, cosine_sp
+from utility.similarity import pearson_sp, cosine_sp, cos, adam_adar
 from utility import util
+import networkx as nx
+from node2vec import Node2Vec as nv
+import pandas as pd
 
 
 class SocialReg(MF):
@@ -23,7 +26,33 @@ class SocialReg(MF):
         # self.config.lambdaQ = 0.001
         self.config.alpha = 0.1
         self.tg = TrustGetter()
+        self.g_epinions = nx.read_edgelist("../data_epinions/trust_data.txt", create_using=nx.DiGraph, nodetype=int, data=(("weight", int),))
+        self.g_delicious = nx.read_edgelist("../data_delicious/user_contacts.dat", create_using=nx.Graph, nodetype=int, data=(("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),))
+        self.df_epinions = self.getNode2Vec(self.g_epinions)
+        self.df_delicious = self.getNode2Vec(self.g_delicious)
         # self.init_model()
+
+    def getNode2Vec(self, g):
+        WINDOW = 1
+        MIN_COUNT = 1
+        BATCH_WORDS = 4
+
+        g_emb = nv(g, dimensions=16)
+
+        md1 = g_emb.fit(
+            vector_size = 16,
+            window = WINDOW,
+            min_count = MIN_COUNT,
+            batch_words = BATCH_WORDS
+        )
+
+        emb_df = (
+            pd.DataFrame(
+                [md1.wv.get_vector(str(n)) for n in g.nodes()],
+                index = g.nodes
+            )
+        )
+        return emb_df
 
     def init_model(self, k):
         super(SocialReg, self).init_model(k)
@@ -43,7 +72,9 @@ class SocialReg(MF):
         # util.save_data(self.user_sim,'../data/sim/ft_cf_soreg08.pkl')
 
     def get_sim(self, u, k):
-        sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
+        #sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
+        sim = adam_adar(u, k, self.g_epinions)
+        # sim = cos(u, k, self.df_epinions)
         return sim
 
     def train_model(self, k):

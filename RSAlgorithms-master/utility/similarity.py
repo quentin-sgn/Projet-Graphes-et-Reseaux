@@ -5,9 +5,27 @@ sys.path.append("..")
 import numpy as np
 from math import sqrt
 from utility.tools import sigmoid_2
+import networkx as nx
 
 
 # x1,x2 is the form of np.array.
+
+def adam_adar(u, k, g):
+    return list(nx.adamic_adar_index(g, [(u, k)]))[0][-1]
+
+def norm(ui):
+    n = 0
+    for x in ui:
+        n += x**2
+    return np.sqrt(n)
+
+def cos(i, j, df):
+    ui = df.loc[i]
+    uj = df.loc[j]
+    sim = 0
+    for k in range(len(ui)):
+        sim += ui[k] * uj[k]
+    return sim / (norm(ui)*norm(uj))
 
 def euclidean(x1, x2):
     # find common ratings
