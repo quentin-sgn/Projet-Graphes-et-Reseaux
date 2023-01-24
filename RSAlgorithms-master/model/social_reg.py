@@ -26,9 +26,9 @@ class SocialReg(MF):
         # self.config.lambdaQ = 0.001
         self.config.alpha = 0.1
         self.tg = TrustGetter()
-        self.g_epinions = nx.read_edgelist("../data_epinions/trust_data.txt", create_using=nx.DiGraph, nodetype=int, data=(("weight", int),))
+        #self.g_epinions = nx.read_edgelist("../data_epinions/trust_data.txt", create_using=nx.DiGraph, nodetype=int, data=(("weight", int),))
         self.g_delicious = nx.read_edgelist("../data_delicious/user_contacts.dat", create_using=nx.Graph, nodetype=int, data=(("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),))
-        self.df_epinions = self.getNode2Vec(self.g_epinions)
+        #self.df_epinions = self.getNode2Vec(self.g_epinions)
         self.df_delicious = self.getNode2Vec(self.g_delicious)
         # self.init_model()
 
@@ -66,15 +66,19 @@ class SocialReg(MF):
             for f in self.tg.get_followees(u):
                 if self.user_sim.contains(u, f):
                     continue
-                sim = self.get_sim(u, f)
+                try:
+                    sim = self.get_sim(u, f)
+                except:
+                    sim = 0
                 self.user_sim.set(u, f, sim)
 
         # util.save_data(self.user_sim,'../data/sim/ft_cf_soreg08.pkl')
 
     def get_sim(self, u, k):
-        # sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
-        # sim = adam_adar(u, k, self.g_epinions)
-        # sim = cos(u, k, self.df_epinions)
+        #sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
+        #sim = adam_adar(u, k, self.g_epinions)
+        #sim = adam_adar(u, k, self.g_delicious)
+        #sim = cos(u, k, self.df_epinions)
         sim = cos(u, k, self.df_delicious)
         return sim
 
