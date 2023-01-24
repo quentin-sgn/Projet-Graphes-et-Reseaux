@@ -10,22 +10,34 @@ import networkx as nx
 
 # x1,x2 is the form of np.array.
 
+###################################################################
+################## Similarités ajoutées ###########################
+###################################################################
+
 def adam_adar(u, k, g):
+    ### Similarité Adamic-Adar
     return list(nx.adamic_adar_index(g, [(u, k)]))[0][-1]
 
 def norm(ui):
+    ### Renvoie la norme du vecteur ui
     n = 0
     for x in ui:
         n += x**2
     return np.sqrt(n)
 
 def cos(i, j, df):
+    ### Similarité Cosinus
     ui = df.loc[i]
     uj = df.loc[j]
     sim = 0
     for k in range(len(ui)):
         sim += ui[k] * uj[k]
     return sim / (norm(ui)*norm(uj))
+
+###################################################################
+###################################################################
+###################################################################
+
 
 def euclidean(x1, x2):
     # find common ratings

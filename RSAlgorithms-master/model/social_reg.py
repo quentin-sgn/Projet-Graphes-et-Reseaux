@@ -26,13 +26,24 @@ class SocialReg(MF):
         # self.config.lambdaQ = 0.001
         self.config.alpha = 0.1
         self.tg = TrustGetter()
-        #self.g_epinions = nx.read_edgelist("../data_epinions/trust_data.txt", create_using=nx.DiGraph, nodetype=int, data=(("weight", int),))
+
+
+        ###################################################################
+        ######################### Partie modifiée #########################
+        ###################################################################
+
+        ### Initialisation du graphe Delicious et vectorisation avec Node2Vec 
         self.g_delicious = nx.read_edgelist("../data_delicious/user_contacts.dat", create_using=nx.Graph, nodetype=int, data=(("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),("weight", int),))
-        #self.df_epinions = self.getNode2Vec(self.g_epinions)
         self.df_delicious = self.getNode2Vec(self.g_delicious)
+
+        ### Initialisation du graphe Epinions et vectorisation avec Node2Vec 
+        #self.g_epinions = nx.read_edgelist("../data_epinions/trust_data.txt", create_using=nx.DiGraph, nodetype=int, data=(("weight", int),))
+        #self.df_epinions = self.getNode2Vec(self.g_epinions)
+        
         # self.init_model()
 
     def getNode2Vec(self, g):
+        ### Renvoie le dataframe du graphe g vectorisé avec Node2Vec
         WINDOW = 1
         MIN_COUNT = 1
         BATCH_WORDS = 4
@@ -54,6 +65,28 @@ class SocialReg(MF):
         )
         return emb_df
 
+    def get_sim(self, u, k):
+        ### Renvoie la similarité entre u et k
+        
+        #sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
+
+        # Pour le calcul de la similarité Adamic-Adar pour le graphe Epinions
+        #sim = adam_adar(u, k, self.g_epinions)
+
+        # Pour le calcul de la similarité Adamic-Adar pour le graphe Delicious
+        #sim = adam_adar(u, k, self.g_delicious)
+
+        # Pour le calcul de la similarité Cosinus pour le graphe vectorisé avec Node2Vec de Epinions
+        #sim = cos(u, k, self.df_epinions)
+
+        # Pour le calcul de la similarité Cosinus pour le graphe vectorisé avec Node2Vec de Delicious
+        sim = cos(u, k, self.df_delicious)
+        return sim
+
+    ###################################################################
+    ###################################################################
+    ###################################################################
+
     def init_model(self, k):
         super(SocialReg, self).init_model(k)
         from collections import defaultdict
@@ -74,13 +107,6 @@ class SocialReg(MF):
 
         # util.save_data(self.user_sim,'../data/sim/ft_cf_soreg08.pkl')
 
-    def get_sim(self, u, k):
-        #sim = (pearson_sp(self.rg.get_row(u), self.rg.get_row(k)) + 1.0) / 2.0  # fit the value into range [0.0,1.0]
-        #sim = adam_adar(u, k, self.g_epinions)
-        #sim = adam_adar(u, k, self.g_delicious)
-        #sim = cos(u, k, self.df_epinions)
-        sim = cos(u, k, self.df_delicious)
-        return sim
 
     def train_model(self, k):
         super(SocialReg, self).train_model(k)
